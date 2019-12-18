@@ -10,12 +10,11 @@ winColour = (255, 255, 255)
 win.fill(winColour)
 
 largeSize = 350
-grid = Board((75,175), largeSize)
+gridPos = (75, 175)
+grid = Board(gridPos, largeSize)
 grid.drawGrid(win)
 playX = Button('Play X', 75, 50, Mark.xcolour)
 playO = Button('Play O', winWidth-75-Button.width, 50, Mark.ocolour)
-playX.draw(win)
-playO.draw(win)
 pygame.display.update()
 
 run = True
@@ -25,25 +24,46 @@ while run:
     if event.type == pygame.QUIT:
         run = False
 
-    if event.type == pygame.MOUSEBUTTONUP:
-        grid.update(win, event.pos)
-        pygame.display.update()
-        gameWin = grid.checkWin()
-        gameTie = grid.checkTie()
-        if gameWin[0] or gameTie[0]:
-            pygame.time.delay(150)
-            grid.updateWin(win, gameWin, gameTie)
+    if not Button.clicked:
+        # mouse hovered over button
+        mouse = pygame.mouse.get_pos()
+        if playX.hover(win, mouse):
             pygame.display.update()
-            pygame.time.delay(500)
+        elif playO.hover(win, mouse):
+            pygame.display.update()
+        else:
+            playX.draw(win, False)
+            playO.draw(win, False)
+            pygame.display.update()
+        # mouse clicks a button setting human player
+        if event.type == pygame.MOUSEBUTTONUP:
+            if playX.click(win, mouse):
+                pygame.display.update()
+                grid.setPlayers('X')
+            elif playO.click(win, mouse):
+                pygame.display.update()
+                grid.setPlayers('O')
 
-            win.fill(winColour)
-            font = pygame.font.Font('freesansbold.ttf', 64)
-            text = font.render('X Wins', True, Mark.xcolour)
-            textRect = text.get_rect()
-            textRect.center = (winWidth // 2, winHeight // 2)
-            win.blit(text, textRect)
+    else:
+        if event.type == pygame.MOUSEBUTTONUP:
+            # mouse clicked on grid
+            grid.update(win, event.pos)
             pygame.display.update()
-            pygame.time.delay(1000)
-            run = False
+            if grid.checkWin() or grid.checkTie():
+                pygame.time.delay(750)
+                win.fill(winColour)
+                font = pygame.font.Font('freesansbold.ttf', 64)
+                if grid.xturn:
+                    text = font.render('X Wins', True, Mark.xcolour)
+                else:
+                    text = font.render('O Wins', True, Mark.ocolour)
+                textRect = text.get_rect()
+                textRect.center = (winWidth // 2, winHeight // 2)
+                win.blit(text, textRect)
+                pygame.display.update()
+                pygame.time.delay(1500)
+                run = False
+
+            grid.nextTurn()
 
 pygame.quit()
