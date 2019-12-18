@@ -32,9 +32,6 @@ class Board:
             pygame.draw.line(win, Board.lineColour, line[0],
                 line[1], self.lineWidth)
 
-    def nextTurn(self):
-        self.xturn = not self.xturn
-
     def setPlayers(self, human):
         self.human = human
         if human == 'X':
@@ -42,7 +39,18 @@ class Board:
         else:
             self.ai = 'X'
 
-    def checkWin(self):
+    def humanTurn(self):
+        if self.xturn and self.human == 'X':
+            return True
+        elif not self.xturn and self.human == 'O':
+            return True
+        else:
+            return False
+
+    def nextTurn(self):
+        self.xturn = not self.xturn
+
+    def checkWin(self, player):            
         win = False
        # check for horizontal win
         for row in range(3):
@@ -86,13 +94,10 @@ class Board:
                     return False
         return True
 
-    def update(self, win, pos):
-        column = self.findColumn(pos[0])
-        row = self.findRow(pos[1])
-
+    def update(self, win, row, column):
         # grid spot already taken
         if self.squares[row][column].type != '-':
-            self.xturn = not self.xturn # counteract the nextTurn that occurs later
+            self.nextTurn() # counteract the nextTurn that occurs later
         elif self.xturn:
             self.squares[row][column].type = 'X'
             Mark.drawX(win, self.markPosX[column], self.markPosY[row],

@@ -1,5 +1,6 @@
 import pygame
 from classes import Board, Mark, Button
+import minimaxAI
 pygame.init()
 
 pygame.display.set_caption("Tic Tac Toe")
@@ -17,6 +18,9 @@ playX = Button('Play X', 75, 50, Mark.xcolour)
 playO = Button('Play O', winWidth-75-Button.width, 50, Mark.ocolour)
 pygame.display.update()
 
+depth = 100
+gameWin = (False, '')
+gameTie = False
 run = True
 while run:
     event = pygame.event.wait()
@@ -44,26 +48,40 @@ while run:
                 pygame.display.update()
                 grid.setPlayers('O')
 
-    else:
+    elif grid.humanTurn():
         if event.type == pygame.MOUSEBUTTONUP:
             # mouse clicked on grid
-            grid.update(win, event.pos)
+            column = grid.findColumn(event.pos[0])
+            row = grid.findRow(event.pos[1])
+            grid.update(win, row, column)
+            gameWin = (grid.checkWin(grid.human), grid.human)
+            gameTie = grid.checkTie()
             pygame.display.update()
-            if grid.checkWin() or grid.checkTie():
-                pygame.time.delay(750)
-                win.fill(winColour)
-                font = pygame.font.Font('freesansbold.ttf', 64)
-                if grid.xturn:
-                    text = font.render('X Wins', True, Mark.xcolour)
-                else:
-                    text = font.render('O Wins', True, Mark.ocolour)
-                textRect = text.get_rect()
-                textRect.center = (winWidth // 2, winHeight // 2)
-                win.blit(text, textRect)
-                pygame.display.update()
-                pygame.time.delay(1500)
-                run = False
-
             grid.nextTurn()
+
+    else:
+        aimove = minimaxAI.bestMove(grid.squares, depth, grid.ai)
+        grid.update(win, aimove[0], aimove[1])
+        pygame.display.update()
+        gameWin = (grid.checkWin(grid.ai), grid.ai)
+        gameTie = grid.checkTie()
+        grid.nextTurn()
+
+    if gameWin[0] or gameTie:
+        pygame.time.delay(700)
+        win.fill(winColour)
+        font = pygame.font.Font('freesansbold.ttf', 64)
+        if gameTie:
+            text = font.render('Tie Game', True, Mark.ocolour)
+        elif gameWin[1] == 'X':
+            text = font.render('X Wins', True, Mark.xcolour)
+        elif gameWin[1] == 'O':
+            text = font.render('O Wins', True, Mark.ocolour)
+        textRect = text.get_rect()
+        textRect.center = (winWidth // 2, winHeight // 2)
+        win.blit(text, textRect)
+        pygame.display.update()
+        pygame.time.delay(1500)
+        run = False
 
 pygame.quit()
