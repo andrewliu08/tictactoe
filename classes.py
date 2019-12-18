@@ -1,4 +1,5 @@
 import pygame
+pygame.init()
 class Board:
     lineColour = (84, 86, 79)
 
@@ -142,3 +143,21 @@ class Mark:
     def drawO(win, x, y, shapeWidth, lineWidth):
         pygame.draw.circle(win, Mark.ocolour, (x, y),
             shapeWidth, lineWidth)
+
+class Button:
+    unclickedColour = (240, 240, 240)
+    clickedColour = (200, 200, 210)
+    width = 100
+    height = 50
+    font = pygame.font.Font('freesansbold.ttf', 16)
+
+    def __init__(self, text, x, y, colour):
+        self.text = Button.font.render(text, True, colour)
+        self.textRect = self.text.get_rect()
+        self.textRect.center = (x + Button.width // 2, y + Button.height // 2)
+        self.x = x
+        self.y = y
+
+    def draw(self, win):
+        pygame.draw.rect(win, Button.unclickedColour, (self.x, self.y, Button.width, Button.height))
+        win.blit(self.text, self.textRect)
